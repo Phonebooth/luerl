@@ -47,7 +47,6 @@ metatable(T) ->					%String type metatable
 table() ->					%String table
     [{<<"byte">>,#erl_func{code=fun byte/2}},
      {<<"char">>,#erl_func{code=fun char/2}},
-     {<<"dump">>,#erl_func{code=fun dump/2}},
      {<<"find">>,#erl_func{code=fun find/2}},
      {<<"format">>,#erl_func{code= fun format/2}},
      {<<"gmatch">>,#erl_func{code=fun gmatch/2}},

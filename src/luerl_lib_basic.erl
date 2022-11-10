@@ -34,32 +34,21 @@ install(St) ->
 %% table() -> [{FuncName,Function}].
 %% Caller will convert this list to the correct format.
 
+%% only "safe" functions per http://lua-users.org/wiki/SandBoxes
 table() ->
     [{<<"_VERSION">>,<<"Lua 5.3">>},            %We are optimistic
      {<<"assert">>,#erl_func{code=fun assert/2}},
-     {<<"collectgarbage">>,#erl_func{code=fun collectgarbage/2}},
-     {<<"dofile">>,#erl_func{code=fun dofile/2}},
      {<<"eprint">>,#erl_func{code=fun eprint/2}},
      {<<"error">>,#erl_func{code=fun basic_error/2}},
-     {<<"getmetatable">>,#erl_func{code=fun getmetatable/2}},
      {<<"ipairs">>,#erl_func{code=fun ipairs/2}},
-     {<<"load">>,#erl_func{code=fun load/2}},
-     {<<"loadfile">>,#erl_func{code=fun loadfile/2}},
-     {<<"loadstring">>,#erl_func{code=fun loadstring/2}}, %For Lua 5.1 compatibility
      {<<"next">>,#erl_func{code=fun next/2}},
      {<<"pairs">>,#erl_func{code=fun pairs/2}},
      {<<"pcall">>,#erl_func{code=fun pcall/2}},
      {<<"print">>,#erl_func{code=fun print/2}},
-     {<<"rawequal">>,#erl_func{code=fun rawequal/2}},
-     {<<"rawget">>,#erl_func{code=fun rawget/2}},
-     {<<"rawlen">>,#erl_func{code=fun rawlen/2}},
-     {<<"rawset">>,#erl_func{code=fun rawset/2}},
      {<<"select">>,#erl_func{code=fun select/2}},
-     {<<"setmetatable">>,#erl_func{code=fun setmetatable/2}},
      {<<"tonumber">>,#erl_func{code=fun tonumber/2}},
      {<<"tostring">>,#erl_func{code=fun tostring/2}},
-     {<<"type">>,#erl_func{code=fun type/2}},
-     {<<"unpack">>,#erl_func{code=fun unpack/2}}	%For Lua 5.1 compatibility
+     {<<"type">>,#erl_func{code=fun type/2}}
     ].
 
 assert(As, St) ->
