@@ -40,6 +40,8 @@
 -export([call/2,call/3,emul/2]).
 -export([load_chunk/2,load_chunk/3]).
 
+-export([load_libs/2]).
+
 -export([functioncall/3,methodcall/4,
 	 set_global_key/3,get_global_key/2,
 	 get_table_keys/2,get_table_keys/3,

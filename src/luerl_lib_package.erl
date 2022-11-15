@@ -31,14 +31,14 @@
 -export([install/1]).
 
 %% Export some functions which can be called from elsewhere.
--export([search_path/5]).
+-export([search_path/5, require/2]).
 
 -import(luerl_lib, [lua_error/2,badarg_error/3]).	%Shorten this
 
 install(St0) ->
-    St1 = luerl_emul:set_global_key(<<"require">>,
-				    #erl_func{code=fun require/2}, St0),
-    {S,St2} = luerl_heap:alloc_table(searchers_table(), St1),
+    %%St1 = luerl_emul:set_global_key(<<"require">>,
+	%%			    #erl_func{code=fun require/2}, St0),
+    {S,St2} = luerl_heap:alloc_table(searchers_table(), St0),
     {L,St3} = luerl_heap:alloc_table(loaded_table(), St2),
     {P,St4} = luerl_heap:alloc_table(preload_table(), St3),
     {T,St5} = luerl_heap:alloc_table(table(S, L, P), St4),
