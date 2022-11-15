@@ -28,7 +28,7 @@
 
 -include("luerl.hrl").
 
--export([install/1,fmod/2,frexp/2]).
+-export([install/1,install/2,fmod/2,frexp/2]).
 
 -import(luerl_lib, [lua_error/2,badarg_error/3]).	%Shorten this
 
@@ -50,8 +50,11 @@
 -endif.
 
 install(St0) ->
+    install([], St0).
+
+install(Whitelist, St0) ->
     St1 = St0#luerl{rand=?RAND_SEED()},        	%Default initial random seed
-    luerl_heap:alloc_table(table(), St1).
+    luerl_heap:alloc_table(luerl_lib:filtered_table(Whitelist, table()), St1).
 
 table() ->
     [{<<"abs">>,#erl_func{code=fun abs/2}},

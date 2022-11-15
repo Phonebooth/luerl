@@ -25,7 +25,7 @@
 	 load/2,load/3,
 	 loadfile/2,loadfile/3,
 	 path_loadfile/2,path_loadfile/3,path_loadfile/4,
-	 load_module/3,load_module1/3,
+	 load_module/3,load_module/4,load_module1/4,
 	 call/3,call_chunk/3,
 	 call_function/3,call_function1/3,function_list/2,
 	 call_method/3,call_method1/3,method_list/2,
@@ -142,12 +142,16 @@ path_loadfile([], _, _, _) ->
 %%  Load module and add module table to the path.
 
 load_module(Fp, Mod, St0) when is_list(Fp) ->
-    {Lfp,St1} = encode_list(Fp, St0),
-    load_module1(Lfp, Mod, St1);
+    load_module(Fp, Mod, [], St0);
 load_module(_, _,_) -> error(badarg).
 
-load_module1(Lfp, Mod, St0) ->
-    {Tab,St1} = Mod:install(St0),
+load_module(Fp, Mod, Whitelist, St0) when is_list(Fp) ->
+    {Lfp,St1} = encode_list(Fp, St0),
+    load_module1(Lfp, Mod, Whitelist, St1);
+load_module(_,_,_,_) -> error(badarg).
+
+load_module1(Lfp, Mod, Whitelist, St0) ->
+    {Tab,St1} = Mod:install(Whitelist, St0),
     luerl_emul:set_table_keys(Lfp, Tab, St1).
 
 %% init() -> State.

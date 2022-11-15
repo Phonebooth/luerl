@@ -42,6 +42,8 @@
 
 -export([conv_list/2,conv_list/3]).
 
+-export([filtered_table/2]).
+
 -spec lua_error(_,_) -> no_return().
 -spec badarg_error(_,_,_) -> no_return().
 
@@ -284,3 +286,11 @@ conv_list([A|As], [To|Tos], Rs) ->
     end;
 conv_list([], _, Rs) -> lists:reverse(Rs);	%No more arguments, done
 conv_list(_, [], Rs) -> lists:reverse(Rs).	%No more conversions, done
+
+%% for subsetting module functions for install
+filtered_table([], Table) ->
+    Table;
+filtered_table(Whitelist, Table) ->
+    Pred = fun(K,_) -> lists:member(K, Whitelist) end,
+    FilteredMap = maps:filter(Pred, proplists:to_map(Table)),
+    proplists:from_map(FilteredMap).

@@ -22,7 +22,7 @@
 
 -include("luerl.hrl").
 
--export([install/1]).
+-export([install/1, install/2]).
 
 -import(luerl_lib, [badarg_error/3]).	%Shorten this
 
@@ -33,7 +33,10 @@
 -define(DEFAULT_BXOR, 0).
 
 install(St) ->
-    luerl_heap:alloc_table(table(), St).
+    install([], St).
+
+install(Whitelist, St) ->
+    luerl_heap:alloc_table(luerl_lib:filtered_table(Whitelist, table()), St).
 
 table() ->
     [{<<"band">>,#erl_func{code=fun fband/2}},

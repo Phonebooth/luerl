@@ -21,7 +21,7 @@
 -include("luerl.hrl").
 
 %% The basic entry point to set up the function table.
--export([install/1]).
+-export([install/1, install/2]).
 
 %% Export some functions which can be called from elsewhere.
 -export([print/2,tostring/1,tostring/2,type/1]).
@@ -29,7 +29,11 @@
 -import(luerl_lib, [lua_error/2,badarg_error/3]). %Shorten these
 
 install(St) ->
-    luerl_heap:alloc_table(table(), St).
+    install([], St).
+
+install(Whitelist, St) ->
+    FilteredTable = luerl_lib:filtered_table(Whitelist, table()),
+    luerl_heap:alloc_table(FilteredTable, St).
 
 %% table() -> [{FuncName,Function}].
 %% Caller will convert this list to the correct format.
