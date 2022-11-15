@@ -21,7 +21,7 @@
 -include("luerl.hrl").
 
 %% The basic entry point to set up the function table.
--export([install/1]).
+-export([install/1, install/2]).
 
 %% Export some test functions.
 -export([test_gsub/3,test_match_pat/3,test_pat/1,
@@ -32,7 +32,11 @@
 %%-compile([bin_opt_info]).			%For when we are optimising
 
 install(St0) ->
-    {T,St1} = luerl_heap:alloc_table(table(), St0),
+    install([], St0).
+
+install(Whitelist, St0) ->
+    FilteredTable = luerl_lib:filtered_table(Whitelist, table()),
+    {T,St1} = luerl_heap:alloc_table(FilteredTable, St0),
     {M,St2} = luerl_heap:alloc_table(metatable(T), St1),
     Meta0 = St2#luerl.meta,
     Meta1 = Meta0#meta{string=M},
