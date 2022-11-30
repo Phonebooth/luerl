@@ -27,7 +27,7 @@
 -import(luerl_lib, [lua_error/2,badarg_error/3]).	%Shorten this
 
 install(St) ->
-    install([], St).
+    install(undefined, St).
 
 install(Whitelist, St) ->
     luerl_heap:alloc_table(luerl_lib:filtered_table(Whitelist, table()), St).

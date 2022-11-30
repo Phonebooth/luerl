@@ -50,7 +50,7 @@
 -endif.
 
 install(St0) ->
-    install([], St0).
+    install(undefined, St0).
 
 install(Whitelist, St0) ->
     St1 = St0#luerl{rand=?RAND_SEED()},        	%Default initial random seed

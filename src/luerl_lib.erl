@@ -288,7 +288,7 @@ conv_list([], _, Rs) -> lists:reverse(Rs);	%No more arguments, done
 conv_list(_, [], Rs) -> lists:reverse(Rs).	%No more conversions, done
 
 %% for subsetting module functions for install
-filtered_table([], Table) ->
+filtered_table(undefined, Table) ->
     Table;
 filtered_table(Whitelist, Table) ->
     Pred = fun(K,_) -> lists:member(K, Whitelist) end,
