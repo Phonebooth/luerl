@@ -32,7 +32,7 @@
 -define(TMPNAM_TEMPLATE(S), "/tmp/lua_" ++ S).
 
 install(St) ->
-    install([], St).
+    install(undefined, St).
 
 install(Whitelist, St) ->
     luerl_heap:alloc_table(luerl_lib:filtered_table(Whitelist, table()), St).

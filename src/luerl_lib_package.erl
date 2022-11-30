@@ -36,16 +36,16 @@
 -import(luerl_lib, [lua_error/2,badarg_error/3]).	%Shorten this
 
 install(St0) ->
-    install([], St0).
+    install(undefined, St0).
 
 install(Whitelist, St0) ->
-    St1 = case lists:member(<<"require">>, Whitelist) of
-              true ->
-                  luerl_emul:set_global_key(<<"require">>,
-                                            #erl_func{code=fun require/2}, St0);
-              false ->
-                  St0
-          end,
+    St1 = case luerl_lib:filtered_table(Whitelist, [{<<"require">>, true}]) of
+        [] ->
+            St0;
+        _ ->
+            luerl_emul:set_global_key(<<"require">>,
+                                      #erl_func{code=fun require/2}, St0)
+    end,
     {S,St2} = luerl_heap:alloc_table(luerl_lib:filtered_table(Whitelist, searchers_table()), St1),
     {L,St3} = luerl_heap:alloc_table(luerl_lib:filtered_table(Whitelist, loaded_table()), St2),
     {P,St4} = luerl_heap:alloc_table(luerl_lib:filtered_table(Whitelist, preload_table()), St3),

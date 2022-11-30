@@ -32,7 +32,7 @@
 %%-compile([bin_opt_info]).			%For when we are optimising
 
 install(St0) ->
-    install([], St0).
+    install(undefined, St0).
 
 install(Whitelist, St0) ->
     FilteredTable = luerl_lib:filtered_table(Whitelist, table()),

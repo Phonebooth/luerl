@@ -33,7 +33,7 @@
 -define(DEFAULT_BXOR, 0).
 
 install(St) ->
-    install([], St).
+    install(undefined, St).
 
 install(Whitelist, St) ->
     luerl_heap:alloc_table(luerl_lib:filtered_table(Whitelist, table()), St).
