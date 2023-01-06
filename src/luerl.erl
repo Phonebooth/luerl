@@ -338,6 +338,7 @@ encode_list(Ts, St) ->
     lists:mapfoldl(fun encode/2, St, Ts).
 
 encode(nil, St) -> {nil,St};
+encode(undefined, St) -> {nil,St};
 encode(false, St) -> {false,St};
 encode(true, St) -> {true,St};
 encode(B, St) when is_binary(B) -> {B,St};
@@ -345,16 +346,21 @@ encode(A, St) when is_atom(A) -> {atom_to_binary(A, latin1),St};
 encode(N, St) when is_number(N) -> {N,St};	%Integers and floats
 encode(F, St) when ?IS_MAP(F) -> encode(maps:to_list(F), St);
 encode(L, St0) when is_list(L) ->
-    {Es,{_,St1}} = lists:mapfoldl(fun ({K0,V0}, {I,S0}) ->
-					  {K1,S1} = encode(K0, S0),
-					  {V1,S2} = encode(V0, S1),
-					  {{K1,V1},{I,S2}};
-				      (V0, {I,S0}) ->
-					  {V1,S1} = encode(V0, S0),
-					  {{I,V1},{I+1,S1}}
-			      end, {1,St0}, L),
-    {T,St2} = luerl_heap:alloc_table(Es, St1),
-    {T,St2};					%No more to do for now
+    case io_lib:printable_list(L) of
+        true ->
+            {list_to_binary(L),St0};
+        false ->
+            {Es,{_,St1}} = lists:mapfoldl(fun ({K0,V0}, {I,S0}) ->
+                                                  {K1,S1} = encode(K0, S0),
+                                                  {V1,S2} = encode(V0, S1),
+                                                  {{K1,V1},{I,S2}};
+                                                  (V0, {I,S0}) ->
+                                                  {V1,S1} = encode(V0, S0),
+                                                  {{I,V1},{I+1,S1}}
+                                          end, {1,St0}, L),
+            {T,St2} = luerl_heap:alloc_table(Es, St1),
+            {T,St2}					%No more to do for now
+    end;
 encode(F, St) when is_function(F, 2) ->
     F1 = fun(Args, State) ->
 		 Args1 = decode_list(Args, State),
