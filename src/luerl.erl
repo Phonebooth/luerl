@@ -345,6 +345,8 @@ encode(B, St) when is_binary(B) -> {B,St};
 encode(A, St) when is_atom(A) -> {atom_to_binary(A, latin1),St};
 encode(N, St) when is_number(N) -> {N,St};	%Integers and floats
 encode(F, St) when ?IS_MAP(F) -> encode(maps:to_list(F), St);
+encode([], St) ->
+    luerl_heap:alloc_table([], St);
 encode(L, St0) when is_list(L) ->
     case io_lib:printable_list(L) of
         true ->
