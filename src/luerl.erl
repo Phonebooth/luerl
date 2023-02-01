@@ -142,7 +142,7 @@ path_loadfile([], _, _, _) ->
 %%  Load module and add module table to the path.
 
 load_module(Fp, Mod, St0) when is_list(Fp) ->
-    load_module(Fp, Mod, [], St0);
+    load_module(Fp, Mod, undefined, St0);
 load_module(_, _,_) -> error(badarg).
 
 load_module(Fp, Mod, Whitelist, St0) when is_list(Fp) ->
