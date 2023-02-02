@@ -228,17 +228,50 @@ clock(As, St) ->
     {Tot,_} = erlang:statistics(Type),          %Milliseconds
     {[Tot*1.0e-3],St}.
 
-date(_, St) ->
-    {{Ye,Mo,Da},{Ho,Mi,Sec}} = calendar:local_time(),
-    Str = io_lib:fwrite("~w-~.2.0w-~.2.0w ~.2.0w:~.2.0w:~.2.0w",
-                        [Ye,Mo,Da,Ho,Mi,Sec]),
-    {[iolist_to_binary(Str)],St}.
+-define(Epoch, calendar:datetime_to_gregorian_seconds({{1970,1,1}, {0,0,0}})).
+
+date([<<"*t">>,T], St) ->
+    seconds_to_datetable(T, St);
+date([<<"*t">>], St) ->
+    seconds_to_datetable(time_now(), St);
+date(As, St) ->
+    badarg_error(date, As, St).
+
+seconds_to_datetable(Seconds, St) ->
+    {{Y,Mth,D},{H,Min,S}} = calendar:gregorian_seconds_to_datetime(round(Seconds) + ?Epoch),
+    {Tref, St1} = luerl:encode([{year,Y},{month,Mth},{day,D},{hour,H},{min,Min},{sec,S}], St),
+    {[Tref], St1}.
 
 difftime([T2,T1|_], St) ->
     {[T2 - T1],St};
 difftime(As, St) -> badarg_error(difftime, As, St).
 
+time(As=[#tref{}=Tref|_], St) ->
+    #table{a=_Arr,d=Dict} = luerl_heap:get_table(Tref, St),
+    Plist = ttdict:to_list(Dict),
+    DateTable = list_to_datetable(Plist),
+    case datetable_to_gregorian_seconds(DateTable) of
+        undefined ->
+            badarg_error(time, As, St);
+        Seconds ->
+            {[Seconds - ?Epoch], St}
+    end;
+time(_, St) ->                                  %Seconds since epoch == 1 Jan 1970 UTC
+    {[time_now()],St}.
 
-time(_, St) ->                                  %Time since 1 Jan 1970
+time_now() ->
     {Mega,Sec,Micro} = os:timestamp(),
-    {[1.0e6*Mega+Sec+Micro*1.0e-6],St}.
+    1.0e6*Mega+Sec+1.0e-6*Micro.
+
+list_to_datetable(L) ->
+    list_to_datetable(L, #{}).
+
+list_to_datetable([], Map) ->
+    Map;
+list_to_datetable([{K,V}|R], Map) ->
+    list_to_datetable(R, Map#{binary_to_atom(K) => binary_to_integer(V)}).
+
+datetable_to_gregorian_seconds(#{year:=Y, month:=Mth, day:=D, hour:=H, min:=Min, sec:=S}) ->
+    calendar:datetime_to_gregorian_seconds({{Y,Mth,D},{H,Min,S}});
+datetable_to_gregorian_seconds(_) ->
+    undefined.
