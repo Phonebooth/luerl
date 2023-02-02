@@ -231,13 +231,13 @@ clock(As, St) ->
 -define(Epoch, calendar:datetime_to_gregorian_seconds({{1970,1,1}, {0,0,0}})).
 
 date([<<"*t">>,T], St) ->
-    to_datetable(T, St);
+    seconds_to_datetable(T, St);
 date([<<"*t">>], St) ->
-    to_datetable(time_now(), St);
+    seconds_to_datetable(time_now(), St);
 date(As, St) ->
     badarg_error(date, As, St).
 
-to_datetable(Seconds, St) ->
+seconds_to_datetable(Seconds, St) ->
     {{Y,Mth,D},{H,Min,S}} = calendar:gregorian_seconds_to_datetime(round(Seconds) + ?Epoch),
     {Tref, St1} = luerl:encode([{year,Y},{month,Mth},{day,D},{hour,H},{min,Min},{sec,S}], St),
     {[Tref], St1}.
@@ -246,16 +246,16 @@ difftime([T2,T1|_], St) ->
     {[T2 - T1],St};
 difftime(As, St) -> badarg_error(difftime, As, St).
 
-time([#tref{}=Tref|_], St) ->
+time(As=[#tref{}=Tref|_], St) ->
     #table{a=_Arr,d=Dict} = luerl_heap:get_table(Tref, St),
     Plist = ttdict:to_list(Dict),
-    Y = get_int(<<"year">>, Plist),
-    Mth = get_int(<<"month">>, Plist),
-    D = get_int(<<"day">>, Plist),
-    H = get_int(<<"hour">>, Plist, 12),         %Lua time(args) requires y/m/d; h/m/s default to noon
-    Min = get_int(<<"min">>, Plist, 0),
-    S = get_int(<<"sec">>, Plist, 0),
-    {[calendar:datetime_to_gregorian_seconds({{Y,Mth,D},{H,Min,S}}) - ?Epoch],St};
+    DateTable = list_to_datetable(Plist),
+    case datetable_to_gregorian_seconds(DateTable) of
+        undefined ->
+            badarg_error(time, As, St);
+        Seconds ->
+            {[Seconds - ?Epoch], St}
+    end;
 time(_, St) ->                                  %Seconds since epoch == 1 Jan 1970 UTC
     {[time_now()],St}.
 
@@ -263,13 +263,15 @@ time_now() ->
     {Mega,Sec,Micro} = os:timestamp(),
     1.0e6*Mega+Sec+1.0e-6*Micro.
 
-get_int(Key, Plist) ->
-    get_int(Key, Plist, undefined).
+list_to_datetable(L) ->
+    list_to_datetable(L, #{}).
 
-get_int(Key, Plist, Default) ->
-    case proplists:is_defined(Key, Plist) of
-        true ->
-            binary_to_integer(proplists:get_value(Key, Plist));
-        false ->
-            Default
-    end.
+list_to_datetable([], Map) ->
+    Map;
+list_to_datetable([{K,V}|R], Map) ->
+    list_to_datetable(R, Map#{binary_to_atom(K) => binary_to_integer(V)}).
+
+datetable_to_gregorian_seconds(#{year:=Y, month:=Mth, day:=D, hour:=H, min:=Min, sec:=S}) ->
+    calendar:datetime_to_gregorian_seconds({{Y,Mth,D},{H,Min,S}});
+datetable_to_gregorian_seconds(_) ->
+    undefined.
