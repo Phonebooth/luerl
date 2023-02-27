@@ -338,7 +338,6 @@ encode_list(Ts, St) ->
     lists:mapfoldl(fun encode/2, St, Ts).
 
 encode(nil, St) -> {nil,St};
-encode(undefined, St) -> {nil,St};
 encode(false, St) -> {false,St};
 encode(true, St) -> {true,St};
 encode(B, St) when is_binary(B) -> {B,St};
